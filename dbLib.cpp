@@ -23,46 +23,53 @@
 using namespace std;
 
 void    strPrintTime(char* des, time_t& t) {
-    tm *pTime = gmtime(&t);
+    tm *pTime = localtime(&t);
     strftime(des, 26, "%Y-%m-%d %H:%M:%S", pTime);
 }
 
 void loadNinjaDB(char* fName, L1List<NinjaInfo_t> &db) {
-  ifstream ninjaFile(fName);
-  string ninjaLine;
-  // ignore first line in csv file
-  getline(ninjaFile, ninjaLine);
-  while(getline(ninjaFile,ninjaLine,',')){
-    if(!ninjaLine.empty()){
-      NinjaInfo_t *newNode = new NinjaInfo_t();
-
-      // read report time
-      getline(ninjaFile,ninjaLine,',');
-      char *charTime = new char(22);
-      strncpy(charTime, ninjaLine.data(), 22);
-      struct tm tm;
-      strptime(charTime, "%d/%m/%Y %H:%M:%S" , &tm);
-      newNode->timestamp = mktime(&tm);
-
-      // read ninjaTag
-      getline(ninjaFile,ninjaLine,',');
-      strncpy(newNode->id, ninjaLine.data(), ID_MAX_LENGTH - 1);
-
-      // read longitude
-      getline(ninjaFile,ninjaLine,',');
-      stringstream scin1(ninjaLine);
-      scin1 >> newNode->longitude;
-
-      // read latitude
-      getline(ninjaFile,ninjaLine,',');
-      stringstream scin2(ninjaLine);
-      scin2 >> newNode->latitude;
-
-      db.push_back(*newNode);
-      // goto endline
-      getline(ninjaFile,ninjaLine,'\n');
+    ifstream ninjaFile(fName);
+    string ninjaLine;
+    // ignore first line in csv file
+    getline(ninjaFile, ninjaLine);
+    while(getline(ninjaFile,ninjaLine,',')){
+      if(!ninjaLine.empty()){
+        NinjaInfo_t *newNode = new NinjaInfo_t();
+  
+        // read report time
+        getline(ninjaFile,ninjaLine,',');
+        char *charTime = new char(22);
+        strncpy(charTime, ninjaLine.data(), 22);
+        struct tm tm;
+        strptime(charTime, "%m/%d/%Y %H:%M:%S" , &tm);
+        newNode->timestamp = mktime(&tm);
+  
+        // read ninjaTag
+        getline(ninjaFile,ninjaLine,',');
+        if(ninjaLine.size()<4){
+          for(int i=0; i<4-ninjaLine.size(); i++){
+            newNode->id[i] = '0';
+          }
+          strncpy(newNode->id+4-ninjaLine.size(),ninjaLine.data(), ID_MAX_LENGTH - 1 - 4 + ninjaLine.size());
+        } else{
+          strncpy(newNode->id, ninjaLine.data(), ID_MAX_LENGTH - 1);
+        }
+  
+        // read longitude
+        getline(ninjaFile,ninjaLine,',');
+        stringstream scin1(ninjaLine);
+        scin1 >> newNode->longitude;
+  
+        // read latitude
+        getline(ninjaFile,ninjaLine,',');
+        stringstream scin2(ninjaLine);
+        scin2 >> newNode->latitude;
+  
+        db.push_back(*newNode);
+        // goto endline
+        getline(ninjaFile,ninjaLine,'\n');
+      }
     }
-  }
 }
 
 bool parseNinjaInfo(char* pBuf, NinjaInfo_t& nInfo) {
@@ -70,10 +77,10 @@ bool parseNinjaInfo(char* pBuf, NinjaInfo_t& nInfo) {
     return true;
 }
 
-
 void process(L1List<ninjaEvent_t>& eventList, L1List<NinjaInfo_t>& bList) {
     void*   pGData = NULL;
     initNinjaGlobalData(&pGData);
+    pGData = eventList.getHead();
 
     while (!eventList.isEmpty()) {
         if(!processEvent(eventList[0], bList, pGData))
@@ -95,6 +102,8 @@ void releaseNinjaGlobalData(void* pGData) {
     /// TODO: You should define this function if you allocated extra data at initialization stage
     /// The data pointed by pGData should be released
 }
+
+
 
 
 void printNinjaInfo(NinjaInfo_t& b) {
