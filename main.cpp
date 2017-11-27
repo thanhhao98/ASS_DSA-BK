@@ -21,7 +21,7 @@ int main(int narg, char** argv) {
 
 
     cout << fixed << setprecision(12);// preset for floating point numbers
-    /// Process events
+    // Process events
     process(eventList, db);
 
     cout << resetiosflags(ios::showbase) << setprecision(-1);

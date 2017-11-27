@@ -23,26 +23,26 @@
 using namespace std;
 
 void    strPrintTime(char* des, time_t& t) {
-    tm *pTime = localtime(&t);
+    tm *pTime = gmtime(&t);
     strftime(des, 26, "%Y-%m-%d %H:%M:%S", pTime);
 }
+
+
 
 void loadNinjaDB(char* fName, L1List<NinjaInfo_t> &db) {
     ifstream ninjaFile(fName);
     string ninjaLine;
     // ignore first line in csv file
-    getline(ninjaFile, ninjaLine);
+    getline(ninjaFile, ninjaLine,'\n');
     while(getline(ninjaFile,ninjaLine,',')){
       if(!ninjaLine.empty()){
         NinjaInfo_t *newNode = new NinjaInfo_t();
   
         // read report time
         getline(ninjaFile,ninjaLine,',');
-        char *charTime = new char(22);
-        strncpy(charTime, ninjaLine.data(), 22);
         struct tm tm;
-        strptime(charTime, "%m/%d/%Y %H:%M:%S" , &tm);
-        newNode->timestamp = mktime(&tm);
+        strptime(ninjaLine.c_str(), "%m/%d/%Y %H:%M:%S" , &tm);
+        newNode->timestamp = timegm(&tm);
   
         // read ninjaTag
         getline(ninjaFile,ninjaLine,',');
@@ -57,19 +57,18 @@ void loadNinjaDB(char* fName, L1List<NinjaInfo_t> &db) {
   
         // read longitude
         getline(ninjaFile,ninjaLine,',');
-        stringstream scin1(ninjaLine);
-        scin1 >> newNode->longitude;
+        newNode->longitude = stod(ninjaLine);
   
         // read latitude
         getline(ninjaFile,ninjaLine,',');
-        stringstream scin2(ninjaLine);
-        scin2 >> newNode->latitude;
+        newNode->latitude = stod(ninjaLine);
   
         db.push_back(*newNode);
         // goto endline
         getline(ninjaFile,ninjaLine,'\n');
       }
     }
+    ninjaFile.close();
 }
 
 bool parseNinjaInfo(char* pBuf, NinjaInfo_t& nInfo) {
@@ -93,8 +92,7 @@ void process(L1List<ninjaEvent_t>& eventList, L1List<NinjaInfo_t>& bList) {
 
 
 bool initNinjaGlobalData(void** pGData) {
-    /// TODO: You should define this function if you would like to use some extra data
-    /// the data should be allocated and pass the address into pGData
+    pGData = new void*[2];
     return true;
 }
 

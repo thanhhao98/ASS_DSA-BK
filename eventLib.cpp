@@ -28,4 +28,5 @@ void loadEvents(char* fName, L1List<ninjaEvent_t> &eList) {
       }
     }
   }
+  eventFile.close();
 }

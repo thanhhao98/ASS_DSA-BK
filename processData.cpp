@@ -16,6 +16,7 @@ int getEndEvent(char* code){
   return -1;
 }
 
+
 int switchEvent(ninjaEvent_t event){
   switch(event.code[0]){
     case '0':{
@@ -139,20 +140,23 @@ bool checkAdd(NinjaInfo_t data, L1List<NinjaInfo_t> &list){
 
 void event_3(L1Item<NinjaInfo_t> *pHead){
   L1Item<NinjaInfo_t> *temp = pHead;
-  L1List<NinjaInfo_t> tempList;
-  int count = 0;
+  L1Item<NinjaInfo_t> *tempList = new L1Item<NinjaInfo_t>();
+  strncpy(tempList->data.id, pHead->data.id, ID_MAX_LENGTH - 1);
+  L1Item<NinjaInfo_t> *other = new L1Item<NinjaInfo_t>();
+  temp = temp->pNext;
   while(temp!=NULL){
-    if(count==0){
-      tempList.push_back(temp->data);
-      count++;
-      continue;
+    other = tempList;
+    while(other!=NULL){
+      if(strcmp(other->data.id,temp->data.id)==0){
+        goto event_3_1;
+      }
+      other=other->pNext;
     }
-    if(checkAdd(temp->data,tempList)){
-      count++;
-    }
+    
+    event_3_1:
     temp = temp->pNext;
   }
-  cout << count;
+  cout << tempList.getSize();
 }
 
 double distanceMove(char *code, L1Item<NinjaInfo_t> *pHead){
