@@ -15,6 +15,10 @@
 /// NOTE: each event will be separated by spaces, or endline character
 void loadEvents(char* fName, L1List<ninjaEvent_t> &eList) {
   ifstream eventFile(fName);
+  if(eventFile.fail()){
+    cout << "The file i not fount!";
+    return;
+  }
   string eventLine;
   while(getline(eventFile, eventLine)){
     if(!eventLine.empty()){

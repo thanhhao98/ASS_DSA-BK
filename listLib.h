@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <iostream>
+#define MAX_LENGTH   10
 
 using namespace std;
 
@@ -41,11 +42,15 @@ struct L1Item {
 
 template <class T>
 class L1List {
+
     L1Item<T>   *_pHead;// The head pointer of linked list
     L1Item<T> *_pTail;//The tail pointer of linked list
     size_t      _size;// number of elements in this list
 public:
-    L1List() : _pHead(NULL), _pTail(NULL), _size(0) {}
+    char    maxId[MAX_LENGTH];
+    size_t      listSize;
+    L1Item<T>   *list;
+    L1List() : list(NULL), _pHead(NULL), _pTail(NULL), _size(0), listSize(0) {}
     ~L1List(){};
     L1Item<T>* getHead(){
       return _pHead;
