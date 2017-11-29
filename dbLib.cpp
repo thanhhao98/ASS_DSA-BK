@@ -87,10 +87,15 @@ void loadNinjaDB(char* fName, L1List<NinjaInfo_t> &db) {
                     tempNode->data.latitude = myItem->data.latitude;
                     tempNode->data.longitude = myItem->data.longitude;
                     if(sizeMove>0.005){
+                        tempNode->data.moving = true;
                         tempNode->data.tMove += (myItem->data.timestamp -tempNode->data.timestamp);
                         tempNode->data.la = myItem->data.latitude;
                         tempNode->data.lo = myItem->data.longitude;
                     } else{
+                        if(tempNode->data.moving){
+                            tempNode->data.numStand++;
+                        }
+                        tempNode->data.moving = false;
                         tempNode->data.tStand += (myItem->data.timestamp -tempNode->data.timestamp);
                     }
                     tempNode->data.timestamp = myItem->data.timestamp;

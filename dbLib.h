@@ -31,6 +31,8 @@
 typedef struct NinjaInfo {
     char    id[ID_MAX_LENGTH];
     time_t  timestamp;
+    bool moving;
+    int numStand;
     double  longitude, latitude;
     double lo, la;
     double dMove;
@@ -40,6 +42,8 @@ typedef struct NinjaInfo {
     // default constructor
     NinjaInfo() {
         strcpy(id, "");
+        moving = true;
+        numStand=0;
         dMove =0;
         tMove =0;
         tStand =0;
@@ -48,6 +52,8 @@ typedef struct NinjaInfo {
     }
     NinjaInfo(const char* ninjaID) {
         strcpy(id, ninjaID);
+        moving = true;
+        numStand=0;
         dMove=0;
         tMove=0;
         tStand=0;
