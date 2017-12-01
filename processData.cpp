@@ -39,7 +39,7 @@ int switchEvent(ninjaEvent_t event){
           }
         }
         case '1':{
-          if(5<getEndEvent(event.code)){
+          if(2<getEndEvent(event.code)){
             return 11;
           }else{
             return -1;
@@ -53,7 +53,7 @@ int switchEvent(ninjaEvent_t event){
           }
         }
         case '3':{
-          return -1;
+          return 13;
         }
         case '4':{
           if(event.code[2]=='\0'){
@@ -86,28 +86,28 @@ int switchEvent(ninjaEvent_t event){
       }
     }
     case '5':{
-      if(4<getEndEvent(event.code)){
+      if(1<getEndEvent(event.code)){
         return 5;
       }else{
         return -1;
       }
     }
     case '6':{
-      if(4<getEndEvent(event.code)){
+      if(1<getEndEvent(event.code)){
         return 6;
       }else{
         return -1;
       }
     }
     case '7':{
-      if(4<getEndEvent(event.code)){
+      if(1<getEndEvent(event.code)){
         return 7;
       }else{
         return -1;
       }
     }
     case '8':{
-      if(4<getEndEvent(event.code)){
+      if(1<getEndEvent(event.code)){
         return 8;
       }else{
         return -1;
@@ -126,22 +126,69 @@ int switchEvent(ninjaEvent_t event){
   }
 }
 
-
-bool idExist(char* idCheck, L1Item<NinjaInfo_t> *pHead){
-  L1Item<NinjaInfo_t> *temp = pHead;
-  while(temp!=NULL){
-    if(strcmp(idCheck,temp->data.id)==0){
-      return true;
-    }
+bool miniEvent14(L1Item<NinjaInfo_t> *pNode){
+  if(pNode->data.id[0]=='\0'){
+    return false;
+  }
+  L1Item<NinjaInfo_t> *temp = pNode->pFirst;
+  L1Item<NinjaInfo_t> *listMove = new L1Item<NinjaInfo_t>();
+  double longitude, latitude;
+  longitude = listMove->data.longitude = temp->data.longitude;
+  latitude = listMove->data.latitude = temp->data.latitude;
+  for(int i=0; i< pNode->sizeId-1; i++){
     temp=temp->pNext;
+    if(distanceEarth(latitude,longitude,temp->data.latitude,temp->data.longitude)>0.005){
+      L1Item<NinjaInfo_t> *nodeMove = new L1Item<NinjaInfo_t>();
+      longitude =  nodeMove->data.longitude  = temp->data.longitude;
+      latitude = nodeMove->data.latitude = temp->data.latitude;
+      L1Item<NinjaInfo_t> *test = listMove;
+      while(test!=NULL){
+        if(distanceEarth(latitude,longitude,test->data.latitude,test->data.longitude)<=0.005){
+          return true;
+        }
+        test= test->pNext;
+      }
+      nodeMove->pNext = listMove;
+      listMove = nodeMove;
+    }
+  }
+  temp=temp->pNext;
+  if(strcmp(temp->data.id,pNode->data.id)==0){
+    if(distanceEarth(latitude,longitude,temp->data.latitude,temp->data.longitude)>0.005){
+      L1Item<NinjaInfo_t> *test = listMove;
+      while(test->pNext!=NULL){
+        if(distanceEarth(temp->data.latitude,temp->data.longitude,test->data.latitude,test->data.longitude)<=0.005){
+          return true;
+        }
+        test= test->pNext;
+      }
+    }
   }
   return false;
+}
+
+void event14(L1Item<NinjaInfo_t> *pList){
+  L1Item<NinjaInfo_t> *temp = pList;
+  if(temp==NULL){
+    return;
+  } else {
+    event14(temp->pNext);
+    if(miniEvent14(temp)){
+      cout << " " << temp->data.id;
+    };
+    return;
+  }
+
 }
 
 bool processEvent(ninjaEvent_t& event, L1List<NinjaInfo_t>& nList, void* pGData) {
     int eventProcess = switchEvent(event);
     if(eventProcess<0){
       return false;
+    }if(eventProcess==14){
+      cout << 14 << ":";
+    } else if(eventProcess==13) {
+      return true;
     } else{
       cout << event.code << ": ";
     }
@@ -176,93 +223,89 @@ bool processEvent(ninjaEvent_t& event, L1List<NinjaInfo_t>& nList, void* pGData)
         break;
       }
       case 5:{
-        L1Item<NinjaInfo_t> *temp = nList.getHead();
         char id[ID_MAX_LENGTH];
         strncpy(id, event.code+1 , ID_MAX_LENGTH - 1);
-        if(idExist(id,nList.list)){
-          time_t timeMove, timeFirst;
-          bool tempBool = true;
-          bool moveFirst=false;
-          bool exist = false;
-          double longitude;
-          double latitude;
-          while(temp!=NULL){
-            if(strcmp(id,temp->data.id)==0){
-              if(!exist){
-                exist = true;
-                timeFirst = temp->data.timestamp;
-                longitude = temp->data.longitude;
-                latitude = temp->data.latitude;
-              } else {
-                if(distanceEarth(latitude,longitude,temp->data.latitude,temp->data.longitude)>0.005){
-                  if(tempBool){
-                    moveFirst = true;
-                  }
-                  timeMove = temp->data.timestamp;
-                  break;
+        L1Item<NinjaInfo_t> *pCheckExist = nList.list;
+        while(pCheckExist!=NULL){
+          if(strcmp(id,pCheckExist->data.id)==0){
+            L1Item<NinjaInfo_t> *temp = pCheckExist->pFirst;
+            time_t timeMove, timeFirst;
+            timeMove = timeFirst = temp->data.timestamp;
+            bool empty = false;
+            bool tempBool = true;
+            bool moveFirst=false;
+            double longitude = pCheckExist->pFirst->data.longitude;
+            double latitude = pCheckExist->pFirst->data.latitude;
+            for(int i=0; i< pCheckExist->sizeId;i++){
+              temp=temp->pNext;
+              empty=true;
+              if(distanceEarth(latitude,longitude,temp->data.latitude,temp->data.longitude)>0.005){
+                empty= false;
+                if(tempBool){
+                  moveFirst = true;
                 }
-                tempBool= false;
+                timeMove = temp->data.timestamp;
+                break;
               }
+              tempBool= false;
             }
-            temp=temp->pNext;
-          }
-          outCase5:
-          if(exist){
             char timeChar[26];
-            if(moveFirst){
+            if(empty){
+              cout << "empty";
+              goto outCase5;
+            } else if(moveFirst){
               strPrintTime(timeChar,timeFirst);
             } else{
               strPrintTime(timeChar,timeMove);
             }
             cout << timeChar;
+            goto outCase5;
           }
-        }else {
-          cout << -1;
+          pCheckExist= pCheckExist->pNext;
         }
+        cout << -1;
+        outCase5:
         break;
       }
       case 6:{
-        L1Item<NinjaInfo_t> *temp = nList.getHead();
         char id[ID_MAX_LENGTH];
         strncpy(id, event.code+1 , ID_MAX_LENGTH - 1);
-        if(idExist(id,nList.list)){
-          time_t timeNotMove;
-          time_t justMove;
-          bool exist = false;
-          bool moving = false;
-          double longitude;
-          double latitude;
-          while(temp!=NULL){
-            if(strcmp(id,temp->data.id)==0){
-              if(!exist){
-                exist = true;
+        L1Item<NinjaInfo_t> *pCheckExist = nList.list;
+        while(pCheckExist!=NULL){
+          if(strcmp(id,pCheckExist->data.id)==0){
+            if(pCheckExist->data.numStand==0){
+              cout << "Non-stop";
+              goto outCase6;
+            }
+            L1Item<NinjaInfo_t> *temp = pCheckExist->pFirst;
+            time_t timeNotMove, justMove;
+            timeNotMove = temp->data.timestamp;
+            bool moving = false;
+            double longitude = pCheckExist->pFirst->data.longitude;
+            double latitude = pCheckExist->pFirst->data.latitude;
+            for(int i=0; i< pCheckExist->sizeId;i++){
+              temp=temp->pNext;
+              if(distanceEarth(latitude,longitude,temp->data.latitude,temp->data.longitude)>0.005){
                 longitude = temp->data.longitude;
                 latitude = temp->data.latitude;
-                timeNotMove = temp->data.timestamp;
-              } else {
-                if(distanceEarth(latitude,longitude,temp->data.latitude,temp->data.longitude)>0.005){
-                  longitude = temp->data.longitude;
-                  latitude = temp->data.latitude;
-                  justMove = temp->data.timestamp;
-                  moving = true;
-                } else{
-                  if(moving){
-                    timeNotMove = justMove;
-                  }
-                  moving = false;
+                justMove = temp->data.timestamp;
+                moving = true;
+              } else{
+                if(moving){
+                  timeNotMove = justMove;
                 }
+                moving = false;
               }
             }
-            temp=temp->pNext;
-          }
-          if(exist){
             char timeChar[26];
             strPrintTime(timeChar,timeNotMove);
             cout << timeChar;
+            goto outCase6;
           }
-        } else {
-          cout << -1;
+          pCheckExist= pCheckExist->pNext;
         }
+        cout << -1;
+        outCase6:
         break;
       }
       case 7:{
@@ -379,16 +422,8 @@ bool processEvent(ninjaEvent_t& event, L1List<NinjaInfo_t>& nList, void* pGData)
         break;
       }
       case 14:{
-        string firstTime = "12/06/2016 00:00:00";
-        string secondTime = "12/05/2016 23:59:50";
-        time_t first;
-        time_t second;
-        struct tm tm;
-        strptime(firstTime.c_str(), "%m/%d/%Y %H:%M:%S" , &tm);
-        first= timegm(&tm);
-        strptime(secondTime.c_str(), "%m/%d/%Y %H:%M:%S" , &tm);
-        second= timegm(&tm);
-        cout << difftime(first, second);
+        event14(nList.list);
+        break;
       }
     }
 

@@ -35,9 +35,12 @@ public:
 template <class T>
 struct L1Item {
     T data;
+    int countSize =0;
     L1Item<T> *pNext;
-    L1Item() : pNext(NULL) {}
-    L1Item(T &a) : data(a), pNext(NULL) {}
+    L1Item<T> *pFirst;
+    int sizeId;
+    L1Item() : pNext(NULL), pFirst(NULL) {}
+    L1Item(T &a) : data(a), pNext(NULL) , pFirst(NULL) {}
 };
 
 template <class T>

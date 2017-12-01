@@ -40,6 +40,7 @@ void loadNinjaDB(char* fName, L1List<NinjaInfo_t> &db) {
     string ninjaLine;
     // ignore first line in csv file
     getline(ninjaFile, ninjaLine,'\n');
+    int i=0;
     while(getline(ninjaFile,ninjaLine,',')){
       if(!ninjaLine.empty()){
         NinjaInfo_t *newNode = new NinjaInfo_t();
@@ -78,10 +79,13 @@ void loadNinjaDB(char* fName, L1List<NinjaInfo_t> &db) {
             db.list = myItem;
             strncpy(db.maxId, myItem->data.id, ID_MAX_LENGTH - 1);
             db.listSize++;
+            db.list->pFirst = db.getTail();
+            db.list->sizeId = 0;
         } else{
             L1Item<NinjaInfo_t> *tempNode = db.list;
             while(tempNode!=NULL){
                 if(strcmp(tempNode->data.id,myItem->data.id)==0){
+                    tempNode->sizeId++;
                     sizeMove=distanceEarth(tempNode->data.la,tempNode->data.lo, myItem->data.latitude,myItem->data.longitude);
                     tempNode->data.dMove+=distanceEarth(tempNode->data.latitude,tempNode->data.longitude, myItem->data.latitude,myItem->data.longitude);
                     tempNode->data.latitude = myItem->data.latitude;
@@ -110,13 +114,15 @@ void loadNinjaDB(char* fName, L1List<NinjaInfo_t> &db) {
             db.list->data.lo = db.list->data.longitude;
             db.list->data.la = db.list->data.latitude;
             db.list = myItem;
+            db.list->pFirst = db.getTail();
+            db.list->sizeId = 0;
             db.listSize++;
 
         }
-
         readData1:
         // goto endline
         getline(ninjaFile,ninjaLine,'\n');
+        i++;
       }
     }
     ninjaFile.close();
