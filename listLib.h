@@ -39,6 +39,7 @@ struct L1Item {
     L1Item<T> *pNext;
     L1Item<T> *pFirst;
     int sizeId;
+    int firstId;
     L1Item() : pNext(NULL), pFirst(NULL) {}
     L1Item(T &a) : data(a), pNext(NULL) , pFirst(NULL) {}
 };
@@ -50,7 +51,6 @@ class L1List {
     L1Item<T> *_pTail;//The tail pointer of linked list
     size_t      _size;// number of elements in this list
 public:
-    char    maxId[MAX_LENGTH];
     size_t      listSize;
     L1Item<T>   *list;
     L1List() : list(NULL), _pHead(NULL), _pTail(NULL), _size(0), listSize(0) {}

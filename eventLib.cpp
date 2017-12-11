@@ -27,6 +27,13 @@ void loadEvents(char* fName, L1List<ninjaEvent_t> &eList) {
       while(streamLine>>eventCode){
         if(!eventCode.empty()){
           ninjaEvent_t *newNinjaEvent = new ninjaEvent_t(eventCode);
+          int i=0;
+          while(newNinjaEvent->code[i]!='\0'){
+            if(newNinjaEvent->code[i]==';' && newNinjaEvent->code[i+1]=='\0'){
+              newNinjaEvent->code[i]='\0';
+            }
+            i++;
+          }
           eList.push_back(*newNinjaEvent);
         }
       }
